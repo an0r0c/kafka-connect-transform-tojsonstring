@@ -27,6 +27,8 @@ import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.apache.kafka.connect.transforms.util.SimpleConfig;
 import org.bson.BsonDocument;
+import org.bson.json.JsonMode;
+import org.bson.json.JsonWriterSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +45,14 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
 
     private interface ConfigName {
         String JSON_STRING_FIELD_NAME = "json.string.field.name";
+        String JSON_WRITER_OUTPUT_MODE = "json.writer.output.mode";
     }
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef()
             .define(ConfigName.JSON_STRING_FIELD_NAME, ConfigDef.Type.STRING, "jsonstring", ConfigDef.Importance.HIGH,
-                    "Field name for output JSON String field");
+                    "Field name for output JSON String field")
+            .define(ConfigName.JSON_WRITER_OUTPUT_MODE, ConfigDef.Type.STRING, "RELAXED", ConfigDef.Importance.MEDIUM,
+                    "Output mode of JSON Writer (RELAXED,EXTENDED,SHELL or STRICT)");
 
     private static final String PURPOSE = "Converting record with Schema into a simple JSON String";
 
@@ -55,12 +60,19 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     private Schema jsonStringOutputSchema;
 
     AvroJsonSchemafulRecordConverter converter;
+    JsonWriterSettings jsonWriterSettings;
 
     @Override
     public void configure(Map<String, ?> props) {
         final SimpleConfig config = new SimpleConfig(CONFIG_DEF, props);
         jsonStringFieldName = config.getString(ConfigName.JSON_STRING_FIELD_NAME);
         jsonStringOutputSchema = makeJsonStringOutputSchema();
+
+        jsonWriterSettings = JsonWriterSettings
+                .builder()
+                .outputMode(toJsonMode(config.getString(ConfigName.JSON_WRITER_OUTPUT_MODE)))
+                .build();
+
 
         converter = new AvroJsonSchemafulRecordConverter();
     }
@@ -90,7 +102,7 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         BsonDocument bsonDoc = converter.convert(schema, value);
 
         final Struct jsonStringOutputStruct = new Struct(jsonStringOutputSchema);
-        jsonStringOutputStruct.put(jsonStringFieldName, bsonDoc.toJson());
+        jsonStringOutputStruct.put(jsonStringFieldName, bsonDoc.toJson(jsonWriterSettings));
 
         return newRecord(record, jsonStringOutputSchema, jsonStringOutputStruct);
     }
@@ -113,6 +125,21 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
                 .version(1)
                 .field(jsonStringFieldName, Schema.STRING_SCHEMA)
                 .build();
+    }
+
+    private JsonMode toJsonMode(String jsonMode)
+    {
+        switch(jsonMode)
+        {
+            case "SHELL":
+                return JsonMode.SHELL;
+            case "EXTENDED":
+                return JsonMode.EXTENDED;
+            case "STRICT":
+                return JsonMode.STRICT;
+            default:
+                return JsonMode.RELAXED;
+        }
     }
 
     protected abstract Schema operatingSchema(R record);

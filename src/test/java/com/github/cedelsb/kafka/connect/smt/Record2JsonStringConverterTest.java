@@ -20,6 +20,7 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -34,23 +35,22 @@ public class Record2JsonStringConverterTest {
     private Record2JsonStringConverter<SinkRecord> valueSmt = new Record2JsonStringConverter.Value<>();
     private Record2JsonStringConverter<SinkRecord> keySmt = new Record2JsonStringConverter.Key<>();
 
+    private Schema nestedSchema;
+    private Schema simpleStructSchema;
+    private Struct simpleStruct;
 
-    @Test
-    public void transformRecordValue2JsonStringTest() {
-        final Map<String, Object> props = new HashMap<>();
+    @Before
+    public void createSchemasAndStructs()
+    {
 
-        props.put("json.string.field.name", "myawesomejsonstringfield");
-
-        valueSmt.configure(props);
-
-        final Schema nestedSchema = SchemaBuilder
+        nestedSchema = SchemaBuilder
                 .struct()
                 .name("nestedElement")
                 .version(1)
                 .field("entry", Schema.STRING_SCHEMA)
                 .build();
 
-        final Schema simpleStructSchema = SchemaBuilder
+        simpleStructSchema = SchemaBuilder
                 .struct()
                 .name("testSchema")
                 .version(1)
@@ -69,7 +69,7 @@ public class Record2JsonStringConverterTest {
                 .field("nestedArray", SchemaBuilder.array(nestedSchema))
                 .build();
 
-        final Struct simpleStruct = new Struct(simpleStructSchema);
+        simpleStruct = new Struct(simpleStructSchema);
 
         simpleStruct.put("simpleString", "TestString");
         simpleStruct.put("simpleBoolean", true);
@@ -88,7 +88,15 @@ public class Record2JsonStringConverterTest {
         final List<Struct> nestedStructArray = Arrays.asList(simpleNestedStruct1, simpleNestedStruct2);
 
         simpleStruct.put("nestedArray", nestedStructArray);
+    }
 
+    @Test
+    public void transformRecordValue2JsonStringTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+
+        valueSmt.configure(props);
 
         final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
         final SinkRecord transformedRecord = valueSmt.apply(record);
@@ -99,9 +107,50 @@ public class Record2JsonStringConverterTest {
         Struct value = (Struct) transformedRecord.value();
         String jsonString = (String) value.get("myawesomejsonstringfield");
 
-        assertEquals(jsonString, "{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}");
+        assertEquals(jsonString, "{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}");
     }
 
+    @Test
+    public void transformRecordValue2JsonStringEXTENDEDModeTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("json.writer.output.mode", "EXTENDED");
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(transformedRecord.valueSchema().fields().size(), 1);
+        assertEquals(transformedRecord.valueSchema().field("myawesomejsonstringfield").schema(), Schema.STRING_SCHEMA);
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals(jsonString, "{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": {\"$numberDouble\": \"1.0\"}, \"simpleFLOAT64\": {\"$numberDouble\": \"2.0\"}, \"simpleInt8\": {\"$numberInt\": \"8\"}, \"simpleInt16\": {\"$numberInt\": \"2\"}, \"simpleInt32\": {\"$numberInt\": \"3\"}, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}");
+    }
+
+    @Test
+    public void transformRecordValue2JsonStringDateTimeHandlingTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("json.writer.output.mode", "EXTENDED");
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(transformedRecord.valueSchema().fields().size(), 1);
+        assertEquals(transformedRecord.valueSchema().field("myawesomejsonstringfield").schema(), Schema.STRING_SCHEMA);
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals(jsonString, "{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": {\"$numberDouble\": \"1.0\"}, \"simpleFLOAT64\": {\"$numberDouble\": \"2.0\"}, \"simpleInt8\": {\"$numberInt\": \"8\"}, \"simpleInt16\": {\"$numberInt\": \"2\"}, \"simpleInt32\": {\"$numberInt\": \"3\"}, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}");
+    }
 
     @Test
     public void transformRecordKey2JsonStringTest() {

@@ -25,9 +25,24 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 }
 ```
 
+### Parameters
+
+<table class="data-table"><tbody>
+<tr><th>Name</th><th>Description</th><th>Type</th><th>Default</th><th>Valid Values</th><th>Importance</th></tr>
+<tr>
+<td>json.string.field.name</td>
+<td>Output schema field name of field that contains the JSON String</td><td>string</td><td></td><td>non-empty string</td><td>high</td>
+</tr>
+<tr>
+<td>json.writer.output.mode</td>
+<td>Output mode of the BSON Json Writer</td><td>string</td><td>RELAXED</td><td>RELAXED, EXTENDED, STRICT or SHELL</td><td>high</td>
+</tr>
+
+</tbody></table>
+
 ## Example
 
-### Input 
+##### Input 
 * Schema (avro syntax)
 ```json5
 {
@@ -68,7 +83,7 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
   -id:element1
   -id:element2 
 ```
-### Output 
+##### Output 
 * Schema
 ```json5
 {
@@ -91,7 +106,9 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 }
 ```
 ## Build, installation / deployment
-TODO
+You can build this project from sources via Maven. 
+
+pre-build download -> to-be-continued 
 
 ## Thanks and Acknowledgement
 Basic structure of how to build a basic SMT was taken from [kafka-connect-insert-uuid](https://github.com/cjmatta/kafka-connect-insert-uuid)
