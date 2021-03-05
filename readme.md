@@ -26,8 +26,70 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 ```
 
 ## Example
-TODO
 
+### Input 
+* Schema (avro syntax)
+```json5
+{
+	"type": "record",
+	"name": "MyEntity",
+	"fields": [{
+		"name": "id",
+		"type": "string"
+	},
+	{
+		"name": "name",
+		"type": "string"
+	},
+	{
+		"name": "subElements",
+		"type": {
+			"type": "array",
+			"items": {
+				"type": "record",
+				"name": "element",
+				"fields": [{
+					"name": "id",
+					"type": "string",
+					
+				}]
+			}
+		}
+	}]
+}
+```
+
+* Value 
+
+```
+-id:myobject
+-name:awesomename
+-subElements:
+  -id:element1
+  -id:element2 
+```
+### Output 
+* Schema
+```json5
+{
+	"type": "record",
+	"name": "jsonStringSchema",
+	"fields": [{
+		"name": "jsonstring",
+		"type": "string"
+	}]
+}
+```
+* Value (of the schema field "jsonstring")
+```json5
+{
+	"id": "record",
+	"name": "jsonStringSchema",
+	"subElements": [{"id": "element1"},
+                    {"id": "element2"}]
+	}]
+}
+```
 ## Build, installation / deployment
 TODO
 
