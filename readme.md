@@ -32,7 +32,7 @@ TODO
 TODO
 
 ## Thanks and Acknowledgement
-Basic structure of how to build a basic SMT was taken from [kafka-connect-insert-uuid](htps://github.com/cjmatta/kafka-connect-insert-uuid)
+Basic structure of how to build a basic SMT was taken from [kafka-connect-insert-uuid](https://github.com/cjmatta/kafka-connect-insert-uuid)
 
 Logic for transforming a Connect Record into a Json Document is build up on the awesome converter implemented in [kafka-connect-mongodb](https://github.com/hpgrahsl/kafka-connect-mongodb) which safed me a lot of time and nerves :)  
 

@@ -27,12 +27,16 @@ import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.apache.kafka.connect.transforms.util.SimpleConfig;
 import org.bson.BsonDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
 public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> implements Transformation<R> {
+
+    private static Logger logger = LoggerFactory.getLogger(Record2JsonStringConverter.class);
 
     public static final String OVERVIEW_DOC =
             "Converts a record value with a schema into a new schema containing a single JSON string field";
@@ -42,8 +46,8 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     }
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef()
-            .define(ConfigName.JSON_STRING_FIELD_NAME, ConfigDef.Type.STRING, "jsonstring",ConfigDef.Importance.HIGH,
-                   "Field name for output JSON String field");
+            .define(ConfigName.JSON_STRING_FIELD_NAME, ConfigDef.Type.STRING, "jsonstring", ConfigDef.Importance.HIGH,
+                    "Field name for output JSON String field");
 
     private static final String PURPOSE = "Converting record with Schema into a simple JSON String";
 
@@ -64,20 +68,26 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     @Override
     public R apply(R record) {
 
+        if (isTombstoneRecord(record))
+            return record;
+
         if (operatingSchema(record) == null) {
-            throw new DataException("Only records with schema are supported");
+            logger.info("toJsontransformation is ignoring value/key without schema");
+            return record;
         }
 
         return applyWithSchema(record);
 
     }
 
+
     private R applyWithSchema(R record) {
+
         final Struct value = requireStruct(operatingValue(record), PURPOSE);
 
         Schema schema = operatingSchema(record);
 
-        BsonDocument bsonDoc = converter.convert(schema,value);
+        BsonDocument bsonDoc = converter.convert(schema, value);
 
         final Struct jsonStringOutputStruct = new Struct(jsonStringOutputSchema);
         jsonStringOutputStruct.put(jsonStringFieldName, bsonDoc.toJson());
@@ -97,12 +107,12 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     }
 
     private Schema makeJsonStringOutputSchema() {
-       return SchemaBuilder
-               .struct()
-               .name("jsonStringSchema")
-               .version(1)
-               .field(jsonStringFieldName,Schema.STRING_SCHEMA)
-               .build();
+        return SchemaBuilder
+                .struct()
+                .name("jsonStringSchema")
+                .version(1)
+                .field(jsonStringFieldName, Schema.STRING_SCHEMA)
+                .build();
     }
 
     protected abstract Schema operatingSchema(R record);
@@ -111,21 +121,30 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
 
     protected abstract R newRecord(R record, Schema updatedSchema, Object updatedValue);
 
+    protected abstract boolean isTombstoneRecord(R record);
+
     public static class Key<R extends ConnectRecord<R>> extends Record2JsonStringConverter<R> {
 
         @Override
         protected Schema operatingSchema(R record) {
+
             return record.keySchema();
         }
 
         @Override
         protected Object operatingValue(R record) {
+
             return record.key();
         }
 
         @Override
         protected R newRecord(R record, Schema updatedSchema, Object updatedValue) {
             return record.newRecord(record.topic(), record.kafkaPartition(), updatedSchema, updatedValue, record.valueSchema(), record.value(), record.timestamp());
+        }
+
+        @Override
+        protected boolean isTombstoneRecord(R record) {
+            return record.key() == null;
         }
 
     }
@@ -145,6 +164,11 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         @Override
         protected R newRecord(R record, Schema updatedSchema, Object updatedValue) {
             return record.newRecord(record.topic(), record.kafkaPartition(), record.keySchema(), record.key(), updatedSchema, updatedValue, record.timestamp());
+        }
+
+        @Override
+        protected boolean isTombstoneRecord(R record) {
+            return record.value() == null;
         }
 
     }
