@@ -20,17 +20,40 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>kafka-connect-transform-avro2jsonstring</groupId>
-    <artifactId>kafka-connect-transform-avro2jsonstring</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
+    <groupId>kafka-connect-transform-record2jsonstring</groupId>
+    <artifactId>kafka-connect-transform-record2jsonstring</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <description>Kafka Connect single message transform (SMT) taking a record (with schema) and transforms it into a single JSON String
+    </description>
+    <url>https://github.com/an0r0c/kafka-connect-transform-tojsonstring</url>
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>https://github.com/an0r0c/kafka-connect-transform-tojsonstring/blob/main/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>an0r0c</id>
+            <name>Christian Edelsbrunner</name>
+            <url>https://github.com/an0r0c</url>
+            <roles>
+                <role>Owner</role>
+            </roles>
+        </developer>
+    </developers>
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/an0r0c/kafka-connect-transform-tojsonstring/issues</url>
+    </issueManagement>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <kafkaconnect.version>2.6.0</kafkaconnect.version>
         <confluent.version>6.0.0</confluent.version>
+        <shade.prefix>record2json</shade.prefix>
     </properties>
-
 
     <dependencies>
         <dependency>
@@ -59,49 +82,100 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
+            <!--
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/maven/**</exclude>
+                                <exclude>META-INF/LICENSE*</exclude>
+                                <exclude>META-INF/NOTICE*</exclude>
+                                <exclude>META-INF/DEPENDENCIES</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                    <relocations>
+                        <relocation>
+                            <pattern>at.grahsl.kafka.connect</pattern>
+                            <shaddedPattern>${shade.prefix}.at.grahsl.kafka.connect</shaddedPattern>
+                            <includes>
+                                <include>at.grahsl.kafka.connect.mongodb.converter.*</include>
+                            </includes>
+                        </relocation>
+                    </relocations>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                    </transformers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.8.1</version>
                 <inherited>true</inherited>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
             </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>copy-dependencies</id>
-                    <phase>prepare-package</phase>
-                    <goals>
-                        <goal>copy-dependencies</goal>
-                    </goals>
-                    <configuration>
-                        <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                        <overWriteReleases>false</overWriteReleases>
-                        <overWriteSnapshots>false</overWriteSnapshots>
-                        <overWriteIfNewer>true</overWriteIfNewer>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <addClasspath>true</addClasspath>
-                        <classpathPrefix>lib/</classpathPrefix>
-                        <mainClass>theMainClass</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-        </plugin>
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-connect-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>kafka-connect</goal>
+                        </goals>
+                        <configuration>
+                            <title>Record to JSON String Transformation</title>
+                            <confluentControlCenterIntegration>false</confluentControlCenterIntegration>
+                            <documentationUrl>https://github.com/an0r0c/kafka-connect-transform-tojsonstring</documentationUrl>
+                            <sourceUrl>https://github.com/an0r0c/kafka-connect-transform-tojsonstring</sourceUrl>
+                            <componentTypes>
+                                <componentType>transform</componentType>
+                            </componentTypes>
+                            <ownerUsername>an0r0c</ownerUsername>
+                            <ownerName>Christian Edelsbrunner</ownerName>
+                            <ownerType>user</ownerType>
+                            <ownerUrl>https://github.com/an0r0c</ownerUrl>
+                            <tags>
+                                <tag>Transform</tag>
+                            </tags>
+                            <supportUrl>https://github.com/an0r0c/kafka-connect-transform-tojsonstring/issues
+                            </supportUrl>
+                            <supportSummary>Support provided through open source community, bugs can be filed as github issues.
+                            </supportSummary>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <repositories>
