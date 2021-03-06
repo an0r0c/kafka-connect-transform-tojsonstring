@@ -21,3 +21,15 @@ jobs:
         java-version: 1.8
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: Set Release version env variable
+      run: | 
+            echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: target/release/mything
+        asset_name: /home/runner/work/kafka-connect-transform-tojsonstring/kafka-connect-transform-tojsonstring/target/components/packages/an0r0c-kafka-connect-transform-record2jsonstring-${{ env.RELEASE_VERSION }}.zip
+        tag: ${{ github.ref }}
+        overwrite: true
+        body: "This is my release text"
