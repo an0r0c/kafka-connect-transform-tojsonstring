@@ -22,7 +22,7 @@
 
     <groupId>kafka-connect-transform-record2jsonstring</groupId>
     <artifactId>kafka-connect-transform-record2jsonstring</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <description>Kafka Connect single message transform (SMT) taking a record (with schema) and transforms it into a single JSON String
     </description>
     <url>https://github.com/an0r0c/kafka-connect-transform-tojsonstring</url>
@@ -95,46 +95,6 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/maven/**</exclude>
-                                <exclude>META-INF/LICENSE*</exclude>
-                                <exclude>META-INF/NOTICE*</exclude>
-                                <exclude>META-INF/DEPENDENCIES</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                    <relocations>
-                        <relocation>
-                            <pattern>at.grahsl.kafka.connect</pattern>
-                            <shaddedPattern>${shade.prefix}.at.grahsl.kafka.connect</shaddedPattern>
-                            <includes>
-                                <include>at.grahsl.kafka.connect.mongodb.converter.*</include>
-                            </includes>
-                        </relocation>
-                    </relocations>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                    </transformers>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
