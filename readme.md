@@ -108,7 +108,7 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 ## Build, installation / deployment
 You can build this project from sources via Maven. 
 
-pre-build download -> to-be-continued 
+Or download a pre-build release from [Releases](https://github.com/an0r0c/kafka-connect-transform-tojsonstring/releases) 
 
 ## Thanks and Acknowledgement
 Basic structure of how to build a basic SMT was taken from [kafka-connect-insert-uuid](https://github.com/cjmatta/kafka-connect-insert-uuid)
