@@ -101,13 +101,13 @@ public class Record2JsonStringConverterTest {
         final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
         final SinkRecord transformedRecord = valueSmt.apply(record);
 
-        assertEquals(transformedRecord.valueSchema().fields().size(), 1);
-        assertEquals(transformedRecord.valueSchema().field("myawesomejsonstringfield").schema(), Schema.STRING_SCHEMA);
+        assertEquals(1, transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA,transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
 
         Struct value = (Struct) transformedRecord.value();
         String jsonString = (String) value.get("myawesomejsonstringfield");
 
-        assertEquals(jsonString, "{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}");
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}",jsonString);
     }
 
     @Test
@@ -122,13 +122,13 @@ public class Record2JsonStringConverterTest {
         final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
         final SinkRecord transformedRecord = valueSmt.apply(record);
 
-        assertEquals(transformedRecord.valueSchema().fields().size(), 1);
-        assertEquals(transformedRecord.valueSchema().field("myawesomejsonstringfield").schema(), Schema.STRING_SCHEMA);
+        assertEquals(1,transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA, transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
 
         Struct value = (Struct) transformedRecord.value();
         String jsonString = (String) value.get("myawesomejsonstringfield");
 
-        assertEquals(jsonString, "{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": {\"$numberDouble\": \"1.0\"}, \"simpleFLOAT64\": {\"$numberDouble\": \"2.0\"}, \"simpleInt8\": {\"$numberInt\": \"8\"}, \"simpleInt16\": {\"$numberInt\": \"2\"}, \"simpleInt32\": {\"$numberInt\": \"3\"}, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}");
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": {\"$numberDouble\": \"1.0\"}, \"simpleFLOAT64\": {\"$numberDouble\": \"2.0\"}, \"simpleInt8\": {\"$numberInt\": \"8\"}, \"simpleInt16\": {\"$numberInt\": \"2\"}, \"simpleInt32\": {\"$numberInt\": \"3\"}, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}",jsonString);
     }
 
     @Test
@@ -143,13 +143,13 @@ public class Record2JsonStringConverterTest {
         final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
         final SinkRecord transformedRecord = valueSmt.apply(record);
 
-        assertEquals(transformedRecord.valueSchema().fields().size(), 1);
-        assertEquals(transformedRecord.valueSchema().field("myawesomejsonstringfield").schema(), Schema.STRING_SCHEMA);
+        assertEquals(1,transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA, transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
 
         Struct value = (Struct) transformedRecord.value();
         String jsonString = (String) value.get("myawesomejsonstringfield");
 
-        assertEquals(jsonString, "{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": {\"$numberDouble\": \"1.0\"}, \"simpleFLOAT64\": {\"$numberDouble\": \"2.0\"}, \"simpleInt8\": {\"$numberInt\": \"8\"}, \"simpleInt16\": {\"$numberInt\": \"2\"}, \"simpleInt32\": {\"$numberInt\": \"3\"}, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}");
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": {\"$numberDouble\": \"1.0\"}, \"simpleFLOAT64\": {\"$numberDouble\": \"2.0\"}, \"simpleInt8\": {\"$numberInt\": \"8\"}, \"simpleInt16\": {\"$numberInt\": \"2\"}, \"simpleInt32\": {\"$numberInt\": \"3\"}, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}]}",jsonString);
     }
 
     @Test
@@ -176,13 +176,13 @@ public class Record2JsonStringConverterTest {
         final SinkRecord record = new SinkRecord(null, 0, simpleStructSchema, simpleStruct, null, "value", 0);
         final SinkRecord transformedRecord = keySmt.apply(record);
 
-        assertEquals(transformedRecord.keySchema().fields().size(), 1);
-        assertEquals(transformedRecord.keySchema().field("myawesomejsonstringfield").schema(), Schema.STRING_SCHEMA);
+        assertEquals(1,transformedRecord.keySchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA, transformedRecord.keySchema().field("myawesomejsonstringfield").schema());
 
         Struct key = (Struct) transformedRecord.key();
         String jsonString = (String) key.get("myawesomejsonstringfield");
 
-        assertEquals(jsonString,"{\"simpleString\": \"TestString\", \"simpleBoolean\": true}");
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true}",jsonString);
     }
 
     @Test
@@ -223,9 +223,9 @@ public class Record2JsonStringConverterTest {
         final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, null, 0);
         final SinkRecord transformedRecord = valueSmt.apply(record);
 
-        assertEquals(transformedRecord.valueSchema().fields().size(), 13);
+        assertEquals(13,transformedRecord.valueSchema().fields().size());
 
-        assertEquals(transformedRecord.value(),null);
+        assertEquals(null, transformedRecord.value());
 
     }
 
@@ -247,7 +247,7 @@ public class Record2JsonStringConverterTest {
         Struct value = (Struct) transformedRecord.value();
         String jsonString = (String) value.get("myawesomejsonstringfield");
 
-        assertEquals(jsonString, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root><simpleString>TestString</simpleString><simpleBoolean>true</simpleBoolean><simpleFLOAT32>1.0</simpleFLOAT32><simpleFLOAT64>2.0</simpleFLOAT64><simpleInt8>8</simpleInt8><simpleInt16>2</simpleInt16><simpleInt32>3</simpleInt32><simpleInt64>4</simpleInt64><optionalBoolean/><optionalString/><optionalFloat/><optionalInt/><nestedArray><nestedArray><entry>testEntry</entry></nestedArray><nestedArray><entry>testEntry2</entry></nestedArray></nestedArray></root>");
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><root><simpleString>TestString</simpleString><simpleBoolean>true</simpleBoolean><simpleFLOAT32>1.0</simpleFLOAT32><simpleFLOAT64>2.0</simpleFLOAT64><simpleInt8>8</simpleInt8><simpleInt16>2</simpleInt16><simpleInt32>3</simpleInt32><simpleInt64>4</simpleInt64><optionalBoolean/><optionalString/><optionalFloat/><optionalInt/><nestedArray><nestedArray><entry>testEntry</entry></nestedArray><nestedArray><entry>testEntry2</entry></nestedArray></nestedArray></root>",jsonString);
     }
 
 }

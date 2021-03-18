@@ -32,20 +32,18 @@ import org.bson.json.JsonMode;
 import org.bson.json.JsonWriterSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
@@ -56,10 +54,10 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     public static final String OVERVIEW_DOC =
             "Converts a record value with a schema into a new schema containing a single JSON string field";
 
-    private interface ConfigName {
-        String JSON_STRING_FIELD_NAME = "json.string.field.name";
-        String JSON_WRITER_OUTPUT_MODE = "json.writer.output.mode";
-        String POST_PROCESSING_TO_XML = "post.processing.to.xml";
+    private static final class ConfigName {
+        public static final String JSON_STRING_FIELD_NAME = "json.string.field.name";
+        public static final String JSON_WRITER_OUTPUT_MODE = "json.writer.output.mode";
+        public static final String POST_PROCESSING_TO_XML = "post.processing.to.xml";
     }
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef()
@@ -97,13 +95,19 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
 
         transformToXML = config.getBoolean(ConfigName.POST_PROCESSING_TO_XML);
 
-        if (transformToXML == true)
+        if (transformToXML)
         {
             try {
-                xmlTransformer = TransformerFactory.newInstance().newTransformer();
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, ""); // Compliant
+                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ""); // Compliant
+                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
+
+                // ACCESS_EXTERNAL_SCHEMA not supported in several TransformerFactory implementations
+                xmlTransformer = transformerFactory.newTransformer();
 
             } catch (TransformerConfigurationException e) {
-                throw new DataException(String.format("XML Transformer couln't get initialized:", e));
+                throw new DataException(String.format("XML Transformer couln't get initialized: %s", e));
             }
         }
     }
