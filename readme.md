@@ -1,3 +1,11 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=an0r0c_kafka-connect-transform-tojsonstring&metric=alert_status)](https://sonarcloud.io/dashboard?id=an0r0c_kafka-connect-transform-tojsonstring)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=an0r0c_kafka-connect-transform-tojsonstring&metric=coverage)](https://sonarcloud.io/dashboard?id=an0r0c_kafka-connect-transform-tojsonstring)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=an0r0c_kafka-connect-transform-tojsonstring&metric=security_rating)](https://sonarcloud.io/dashboard?id=an0r0c_kafka-connect-transform-tojsonstring)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=an0r0c_kafka-connect-transform-tojsonstring&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=an0r0c_kafka-connect-transform-tojsonstring)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=an0r0c_kafka-connect-transform-tojsonstring&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=an0r0c_kafka-connect-transform-tojsonstring)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=an0r0c_kafka-connect-transform-tojsonstring&metric=bugs)](https://sonarcloud.io/dashboard?id=an0r0c_kafka-connect-transform-tojsonstring)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=an0r0c_kafka-connect-transform-tojsonstring&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=an0r0c_kafka-connect-transform-tojsonstring)
+
 # kafka-connect-transform-tojsonstring - A simple Record to JSON String SMT
 This is a very simple Kafka Connect SMT which takes the entire key or value record and transforms it to a new record which contains exactly one field with a JSON representation of the origin record. 
 
