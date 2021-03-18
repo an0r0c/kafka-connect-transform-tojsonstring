@@ -229,4 +229,25 @@ public class Record2JsonStringConverterTest {
 
     }
 
+    @Test
+    public void transformRecordValue2JsonStringXMLTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("post.processing.to.xml", true);
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(transformedRecord.valueSchema().fields().size(), 1);
+        assertEquals(transformedRecord.valueSchema().field("myawesomejsonstringfield").schema(), Schema.STRING_SCHEMA);
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals(jsonString, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root><simpleString>TestString</simpleString><simpleBoolean>true</simpleBoolean><simpleFLOAT32>1.0</simpleFLOAT32><simpleFLOAT64>2.0</simpleFLOAT64><simpleInt8>8</simpleInt8><simpleInt16>2</simpleInt16><simpleInt32>3</simpleInt32><simpleInt64>4</simpleInt64><optionalBoolean/><optionalString/><optionalFloat/><optionalInt/><nestedArray><nestedArray><entry>testEntry</entry></nestedArray><nestedArray><entry>testEntry2</entry></nestedArray></nestedArray></root>");
+    }
+
 }

@@ -17,6 +17,7 @@
 package com.github.cedelsb.kafka.connect.smt;
 
 import at.grahsl.kafka.connect.mongodb.converter.AvroJsonSchemafulRecordConverter;
+import net.javacrumbs.json2xml.JsonXmlReader;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
@@ -31,8 +32,20 @@ import org.bson.json.JsonMode;
 import org.bson.json.JsonWriterSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
@@ -46,18 +59,24 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     private interface ConfigName {
         String JSON_STRING_FIELD_NAME = "json.string.field.name";
         String JSON_WRITER_OUTPUT_MODE = "json.writer.output.mode";
+        String POST_PROCESSING_TO_XML = "post.processing.to.xml";
     }
 
     public static final ConfigDef CONFIG_DEF = new ConfigDef()
             .define(ConfigName.JSON_STRING_FIELD_NAME, ConfigDef.Type.STRING, "jsonstring", ConfigDef.Importance.HIGH,
                     "Field name for output JSON String field")
             .define(ConfigName.JSON_WRITER_OUTPUT_MODE, ConfigDef.Type.STRING, "RELAXED", ConfigDef.Importance.MEDIUM,
-                    "Output mode of JSON Writer (RELAXED,EXTENDED,SHELL or STRICT)");
+                    "Output mode of JSON Writer (RELAXED,EXTENDED,SHELL or STRICT)")
+            .define(ConfigName.POST_PROCESSING_TO_XML, ConfigDef.Type.BOOLEAN, false, ConfigDef.Importance.LOW,
+                    "Some old RBDMS like Oracle 11 are not the best in handling JSON - for such scenarios this option can be used to transform the generated JSON into a schemaless XML String");
 
     private static final String PURPOSE = "Converting record with Schema into a simple JSON String";
 
     private String jsonStringFieldName;
     private Schema jsonStringOutputSchema;
+    private boolean transformToXML;
+
+    private Transformer xmlTransformer;
 
     AvroJsonSchemafulRecordConverter converter;
     JsonWriterSettings jsonWriterSettings;
@@ -75,6 +94,18 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
 
 
         converter = new AvroJsonSchemafulRecordConverter();
+
+        transformToXML = config.getBoolean(ConfigName.POST_PROCESSING_TO_XML);
+
+        if (transformToXML == true)
+        {
+            try {
+                xmlTransformer = TransformerFactory.newInstance().newTransformer();
+
+            } catch (TransformerConfigurationException e) {
+                throw new DataException(String.format("XML Transformer couln't get initialized:", e));
+            }
+        }
     }
 
     @Override
@@ -102,7 +133,14 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         BsonDocument bsonDoc = converter.convert(schema, value);
 
         final Struct jsonStringOutputStruct = new Struct(jsonStringOutputSchema);
-        jsonStringOutputStruct.put(jsonStringFieldName, bsonDoc.toJson(jsonWriterSettings));
+        String outputDocument = bsonDoc.toJson(jsonWriterSettings);
+
+        if(transformToXML)
+        {
+            outputDocument = transformJsonStringToXml(outputDocument);
+        }
+
+        jsonStringOutputStruct.put(jsonStringFieldName, outputDocument);
 
         return newRecord(record, jsonStringOutputSchema, jsonStringOutputStruct);
     }
@@ -116,6 +154,20 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     @Override
     public void close() {
         converter = null;
+    }
+
+    private String transformJsonStringToXml(String jsonString)
+    {
+        try {
+            InputSource source = new InputSource(new StringReader(jsonString));
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            StreamResult result = new StreamResult(bos);
+            xmlTransformer.transform(new SAXSource(new JsonXmlReader(null, false, "root"), source), result);
+            return bos.toString();
+
+        }  catch (TransformerException e) {
+            throw new DataException(String.format("Json to XML Transformation failed: %s",e));
+        }
     }
 
     private Schema makeJsonStringOutputSchema() {

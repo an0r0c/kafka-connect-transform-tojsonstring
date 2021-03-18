@@ -20,7 +20,8 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
   ////
   "transforms": "tojson",
   "transforms.tojson.type": "com.github.cedelsb.kafka.connect.smt.Record2JsonStringConverter$Value",
-  "transforms.tojson.json.string.field.name" : "myawesomejsonstring" // Optional 
+  "transforms.tojson.json.string.field.name" : "myawesomejsonstring", // Optional 
+  "transforms.tojson.post.processing.to.xml" : false // Optional 
   ////
 }
 ```
@@ -36,6 +37,11 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 <tr>
 <td>json.writer.output.mode</td>
 <td>Output mode of the BSON Json Writer</td><td>string</td><td>RELAXED</td><td>RELAXED, EXTENDED, STRICT or SHELL</td><td>high</td>
+</tr>
+<tr>
+<td>post.processing.to.xml</td>
+<td>Post Process JSON to XML. Some old RBDMS like Oracle 11 are not the best in handling JSON - for such scenarios this option can be used to transform the generated JSON into a schemaless XML String</td>
+<td>boolean</td><td>false</td><td>true/false</td><td>high</td>
 </tr>
 
 </tbody></table>
@@ -103,7 +109,7 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 	"subElements": [{"id": "element1"},
                     {"id": "element2"}]
 	}]
-}
+} 
 ```
 ## Build, installation / deployment
 You can build this project from sources via Maven. 
