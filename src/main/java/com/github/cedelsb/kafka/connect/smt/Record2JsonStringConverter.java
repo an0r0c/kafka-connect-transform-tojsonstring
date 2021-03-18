@@ -101,9 +101,7 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
                 transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, ""); // Compliant
                 transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ""); // Compliant
-                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
 
-                // ACCESS_EXTERNAL_SCHEMA not supported in several TransformerFactory implementations
                 xmlTransformer = transformerFactory.newTransformer();
 
             } catch (TransformerConfigurationException e) {
