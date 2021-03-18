@@ -53,6 +53,9 @@
         <kafkaconnect.version>2.6.0</kafkaconnect.version>
         <confluent.version>6.0.0</confluent.version>
         <shade.prefix>record2json</shade.prefix>
+        <sonar.projectKey>an0r0c_kafka-connect-transform-tojsonstring</sonar.projectKey>
+        <sonar.organization>an0r0c</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
