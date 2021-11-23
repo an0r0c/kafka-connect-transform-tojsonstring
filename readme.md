@@ -9,6 +9,8 @@
 # kafka-connect-transform-tojsonstring - A simple Record to JSON String SMT
 This is a very simple Kafka Connect SMT which takes the entire key or value record and transforms it to a new record which contains exactly one field with a JSON representation of the origin record. 
 
+Blog Post describing how we ended up developing this SMT can be found [here](https://medium.com/bearingpoint-technology-advisory/handle-arrays-and-nested-arrays-in-kafka-jdbc-sink-connector-41929ea46301?source=friends_link&sk=b7028711b4945c820f647df950cdd949) 
+
 ## Use Cases
 The reason why this SMT was built is the known limitation of the JDBC Sink Connector tohandle nested arrays. If you have schema which contains arrays you cannot really use the JDBC Sink Connector because this connector only supports primitive Data Types. 
 But sometimes you just need also some arrays from the schema in the RDBMS. If your RDBMS is able to handle JSON Strings this SMT might be the saviour. You can use it to transform the whole record into a single JSON String which can be mapped by the JDBC Sink connector. 
