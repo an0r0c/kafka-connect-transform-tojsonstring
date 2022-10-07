@@ -1,0 +1,6 @@
+
+The Initial Developer of the code within src/main/java/com/github/cedelsb/kafka/connect/smt/converter and src/test/java/com/github/cedelsb/kafka/connect/smt/converter and related util classes, which are copied from https://github.com/hpgrahsl/kafka-connect-mongodb is hpgrahsl (https://github.com/hpgrahsl)
+It is licensed in Apache2 and was copied from https://github.com/hpgrahsl/kafka-connect-mongodb. As this repo is not maintained anymore and had some security vulnerabilities in other parts of the code the decision was made to copy over the parts that are needed for this repo. All Rights Reserved.
+
+
+

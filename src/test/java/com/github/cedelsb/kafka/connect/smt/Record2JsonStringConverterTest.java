@@ -23,10 +23,7 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
@@ -219,7 +216,6 @@ public class Record2JsonStringConverterTest {
                 .field("nestedArray", SchemaBuilder.array(nestedSchema))
                 .build();
 
-
         final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, null, 0);
         final SinkRecord transformedRecord = valueSmt.apply(record);
 
@@ -249,5 +245,4 @@ public class Record2JsonStringConverterTest {
 
         assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><root><simpleString>TestString</simpleString><simpleBoolean>true</simpleBoolean><simpleFLOAT32>1.0</simpleFLOAT32><simpleFLOAT64>2.0</simpleFLOAT64><simpleInt8>8</simpleInt8><simpleInt16>2</simpleInt16><simpleInt32>3</simpleInt32><simpleInt64>4</simpleInt64><optionalBoolean/><optionalString/><optionalFloat/><optionalInt/><nestedArray><nestedArray><entry>testEntry</entry></nestedArray><nestedArray><entry>testEntry2</entry></nestedArray></nestedArray></root>",jsonString);
     }
-
 }
