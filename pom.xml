@@ -50,8 +50,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <kafkaconnect.version>2.6.0</kafkaconnect.version>
-        <confluent.version>6.0.0</confluent.version>
+        <kafkaconnect.version>3.3.1</kafkaconnect.version>
+        <confluent.version>7.2.1</confluent.version>
         <shade.prefix>record2json</shade.prefix>
         <sonar.projectKey>an0r0c_kafka-connect-transform-tojsonstring</sonar.projectKey>
         <sonar.organization>an0r0c</sonar.organization>
