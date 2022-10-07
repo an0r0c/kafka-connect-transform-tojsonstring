@@ -39,7 +39,7 @@
             <name>Christian Edelsbrunner</name>
             <url>https://github.com/an0r0c</url>
             <roles>
-                <role>Owner</role>
+                <role>Maintainer</role>
             </roles>
         </developer>
     </developers>
@@ -56,6 +56,13 @@
         <sonar.projectKey>an0r0c_kafka-connect-transform-tojsonstring</sonar.projectKey>
         <sonar.organization>an0r0c</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <junit.vintage.version>5.5.2</junit.vintage.version>
+        <junit.platform.version>1.5.2</junit.platform.version>
+        <mockito.version>3.2.4</mockito.version>
+        <hamcrest.version>2.0.0.0</hamcrest.version>
+        <testcontainers.version>1.17.5</testcontainers.version>
+
     </properties>
 
     <dependencies>
@@ -71,20 +78,67 @@
             <version>${kafkaconnect.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>at.grahsl.kafka.connect</groupId>
-            <artifactId>kafka-connect-mongodb</artifactId>
-            <version>1.4.0</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.vintage.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-console</artifactId>
+            <version>${junit.platform.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-junit</artifactId>
+            <version>${hamcrest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.javacrumbs</groupId>
             <artifactId>json-xml</artifactId>
             <version>4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>4.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.3</version>
         </dependency>
     </dependencies>
 
@@ -151,6 +205,7 @@
             <plugin>
                 <groupId>io.confluent</groupId>
                 <artifactId>kafka-connect-maven-plugin</artifactId>
+                <version>0.12.0</version>
                 <executions>
                     <execution>
                         <goals>

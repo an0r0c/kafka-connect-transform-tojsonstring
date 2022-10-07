@@ -16,7 +16,7 @@
 
 package com.github.cedelsb.kafka.connect.smt;
 
-import at.grahsl.kafka.connect.mongodb.converter.AvroJsonSchemafulRecordConverter;
+import com.github.cedelsb.kafka.connect.smt.converter.AvroJsonSchemafulRecordConverter;
 import net.javacrumbs.json2xml.JsonXmlReader;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;
@@ -35,10 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 import javax.xml.XMLConstants;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
