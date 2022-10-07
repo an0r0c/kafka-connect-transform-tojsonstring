@@ -23,7 +23,6 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 
-import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.apache.kafka.connect.transforms.util.SimpleConfig;
 import org.bson.BsonDocument;
@@ -31,14 +30,8 @@ import org.bson.json.JsonMode;
 import org.bson.json.JsonWriterSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
 
-import javax.xml.XMLConstants;
 import javax.xml.transform.*;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
 import java.util.Map;
 
 import com.github.underscore.U;
@@ -71,8 +64,6 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     private String jsonStringFieldName;
     private Schema jsonStringOutputSchema;
     private boolean transformToXML;
-
-    private Transformer xmlTransformer;
 
     AvroJsonSchemafulRecordConverter converter;
     JsonWriterSettings jsonWriterSettings;
