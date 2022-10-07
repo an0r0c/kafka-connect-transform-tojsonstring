@@ -17,14 +17,12 @@
 package com.github.cedelsb.kafka.connect.smt;
 
 import com.github.cedelsb.kafka.connect.smt.converter.AvroJsonSchemafulRecordConverter;
-import net.javacrumbs.json2xml.JsonXmlReader;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
 
-import org.apache.kafka.connect.errors.DataException;
 import org.apache.kafka.connect.transforms.Transformation;
 import org.apache.kafka.connect.transforms.util.SimpleConfig;
 import org.bson.BsonDocument;
@@ -32,15 +30,11 @@ import org.bson.json.JsonMode;
 import org.bson.json.JsonWriterSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.InputSource;
 
-import javax.xml.XMLConstants;
 import javax.xml.transform.*;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
 import java.util.Map;
+
+import com.github.underscore.U;
 
 import static org.apache.kafka.connect.transforms.util.Requirements.requireStruct;
 
@@ -71,8 +65,6 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     private Schema jsonStringOutputSchema;
     private boolean transformToXML;
 
-    private Transformer xmlTransformer;
-
     AvroJsonSchemafulRecordConverter converter;
     JsonWriterSettings jsonWriterSettings;
 
@@ -91,20 +83,6 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         converter = new AvroJsonSchemafulRecordConverter();
 
         transformToXML = config.getBoolean(ConfigName.POST_PROCESSING_TO_XML);
-
-        if (transformToXML)
-        {
-            try {
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, ""); // Compliant
-                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, ""); // Compliant
-
-                xmlTransformer = transformerFactory.newTransformer();
-
-            } catch (TransformerConfigurationException e) {
-                throw new DataException(String.format("XML Transformer couln't get initialized: %s", e));
-            }
-        }
     }
 
     @Override
@@ -136,7 +114,7 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
 
         if(transformToXML)
         {
-            outputDocument = transformJsonStringToXml(outputDocument);
+           outputDocument = U.jsonToXml(outputDocument);
         }
 
         jsonStringOutputStruct.put(jsonStringFieldName, outputDocument);
@@ -153,20 +131,6 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     @Override
     public void close() {
         converter = null;
-    }
-
-    private String transformJsonStringToXml(String jsonString)
-    {
-        try {
-            InputSource source = new InputSource(new StringReader(jsonString));
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            StreamResult result = new StreamResult(bos);
-            xmlTransformer.transform(new SAXSource(new JsonXmlReader(null, false, "root"), source), result);
-            return bos.toString();
-
-        }  catch (TransformerException e) {
-            throw new DataException(String.format("Json to XML Transformation failed: %s",e));
-        }
     }
 
     private Schema makeJsonStringOutputSchema() {

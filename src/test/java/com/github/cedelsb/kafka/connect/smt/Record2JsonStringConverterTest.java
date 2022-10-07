@@ -243,6 +243,26 @@ public class Record2JsonStringConverterTest {
         Struct value = (Struct) transformedRecord.value();
         String jsonString = (String) value.get("myawesomejsonstringfield");
 
-        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><root><simpleString>TestString</simpleString><simpleBoolean>true</simpleBoolean><simpleFLOAT32>1.0</simpleFLOAT32><simpleFLOAT64>2.0</simpleFLOAT64><simpleInt8>8</simpleInt8><simpleInt16>2</simpleInt16><simpleInt32>3</simpleInt32><simpleInt64>4</simpleInt64><optionalBoolean/><optionalString/><optionalFloat/><optionalInt/><nestedArray><nestedArray><entry>testEntry</entry></nestedArray><nestedArray><entry>testEntry2</entry></nestedArray></nestedArray></root>",jsonString);
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<root>\n" +
+                "  <simpleString>TestString</simpleString>\n" +
+                "  <simpleBoolean boolean=\"true\">true</simpleBoolean>\n" +
+                "  <simpleFLOAT32 number=\"true\">1.0</simpleFLOAT32>\n" +
+                "  <simpleFLOAT64 number=\"true\">2.0</simpleFLOAT64>\n" +
+                "  <simpleInt8 number=\"true\">8</simpleInt8>\n" +
+                "  <simpleInt16 number=\"true\">2</simpleInt16>\n" +
+                "  <simpleInt32 number=\"true\">3</simpleInt32>\n" +
+                "  <simpleInt64 number=\"true\">4</simpleInt64>\n" +
+                "  <optionalBoolean null=\"true\"/>\n" +
+                "  <optionalString null=\"true\"/>\n" +
+                "  <optionalFloat null=\"true\"/>\n" +
+                "  <optionalInt null=\"true\"/>\n" +
+                "  <nestedArray>\n" +
+                "    <entry>testEntry</entry>\n" +
+                "  </nestedArray>\n" +
+                "  <nestedArray>\n" +
+                "    <entry>testEntry2</entry>\n" +
+                "  </nestedArray>\n" +
+                "</root>",jsonString);
     }
 }
