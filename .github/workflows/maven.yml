@@ -4,9 +4,10 @@
 name: Java CI with Maven
 
 on:
-  release:
-      types:
-        - created
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Release Tag'  
         
 jobs:
   build:
@@ -27,13 +28,13 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Set Release version env variable
       run: | 
-            echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+            echo "RELEASE_VERSION=${{ github.event.inputs.tags }}" >> $GITHUB_ENV
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: /home/runner/work/kafka-connect-transform-tojsonstring/kafka-connect-transform-tojsonstring/target/components/packages/an0r0c-kafka-connect-transform-record2jsonstring-${{ env.RELEASE_VERSION }}.zip
-        asset_name: an0r0c-kafka-connect-transform-record2jsonstring-${{ github.ref }}.zip
-        tag: ${{ github.ref }}
+        file: /home/runner/work/kafka-connect-transform-tojsonstring/kafka-connect-transform-tojsonstring/target/components/packages/an0r0c-kafka-connect-transform-record2jsonstring-${{ github.event.inputs.tags }}.zip
+        asset_name: an0r0c-kafka-connect-transform-record2jsonstring-${{ github.event.inputs.tags }}.zip
+        tag: ${{ github.event.inputs.tags }}
         overwrite: true
         body: "This is my release text"
