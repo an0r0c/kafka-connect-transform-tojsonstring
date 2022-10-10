@@ -1,0 +1,19 @@
+{
+  "name": "jdbc-sink",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max": "1",
+    "topics": "smttest",
+    "connection.host": "postgres",
+    "connection.port": "5432",
+    "connection.user": "postgres",
+    "connection.password": "postgres",
+    "connection.url": "jdbc:postgresql://postgres:5432/postgres?currentSchema=smttest",
+    "auto.create": "true",
+    "name": "jdbc-sink",
+    "auto.create": true,
+    "transforms": "tojson",
+    "transforms.tojson.json.string.field.name" : "jsonstring",
+    "transforms.tojson.type": "com.github.cedelsb.kafka.connect.smt.Record2JsonStringConverter$Value"
+  }
+}
