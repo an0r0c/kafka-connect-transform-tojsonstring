@@ -31,7 +31,11 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
   "transforms": "tojson",
   "transforms.tojson.type": "com.github.cedelsb.kafka.connect.smt.Record2JsonStringConverter$Value",
   "transforms.tojson.json.string.field.name" : "myawesomejsonstring", // Optional 
-  "transforms.tojson.post.processing.to.xml" : false // Optional 
+  "transforms.tojson.post.processing.to.xml" : false, // Optional 
+  "transforms.tojson.json.writer.handle.logical.types" : true, // Optional 
+  "transforms.tojson.json.writer.datetime.logical.types.as" : "STRING", // Optional 
+  "transforms.tojson.json.writer.datetime.pattern" : "", // Optional   
+  "transforms.tojson.json.writer.datetime.zoneid" : "UTC" // Optional   
   ////
 }
 ```
@@ -66,7 +70,7 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 <tr>
 <td>json.writer.datetime.pattern</td>
 <td>The pattern (either a predefined constant or pattern letters) to use to format the date/time or timestamp as string, only applicable if json.writer.datetime.logical.types.as=STRING</td>
-<td>string</td><td></td><td>ISO_DATE,ISO_DATE_TIME,ISO_INSTANT,ISO_TIME,ISO_LOCAL_DATE,ISO_LOCAL_DATE_TIME,ISO_LOCAL_TIME,RFC_1123_DATE_TIME,ISO_ZONED_DATE_TIME,ISO_OFFSET_DATE,ISO_OFFSET_DATE_TIME,ISO_OFFSET_TIME,BASIC_ISO_DATE,ISO_ORDINAL_DATE,ISO_WEEK_DATE,"pattern"</td><td>high</td>
+<td>string</td>ISO_INSTANT<td></td><td>ISO_DATE,ISO_DATE_TIME,ISO_INSTANT,ISO_TIME,ISO_LOCAL_DATE,ISO_LOCAL_DATE_TIME,ISO_LOCAL_TIME,RFC_1123_DATE_TIME,ISO_ZONED_DATE_TIME,ISO_OFFSET_DATE,ISO_OFFSET_DATE_TIME,ISO_OFFSET_TIME,BASIC_ISO_DATE,ISO_ORDINAL_DATE,ISO_WEEK_DATE,"pattern"</td><td>high</td>
 </tr>
 <tr>
 <td>json.writer.datetime.zoneid</td>
