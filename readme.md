@@ -31,7 +31,11 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
   "transforms": "tojson",
   "transforms.tojson.type": "com.github.cedelsb.kafka.connect.smt.Record2JsonStringConverter$Value",
   "transforms.tojson.json.string.field.name" : "myawesomejsonstring", // Optional 
-  "transforms.tojson.post.processing.to.xml" : false // Optional 
+  "transforms.tojson.post.processing.to.xml" : false, // Optional 
+  "transforms.tojson.json.writer.handle.logical.types" : true, // Optional 
+  "transforms.tojson.json.writer.datetime.logical.types.as" : "STRING", // Optional 
+  "transforms.tojson.json.writer.datetime.pattern" : "", // Optional   
+  "transforms.tojson.json.writer.datetime.zoneid" : "UTC" // Optional   
   ////
 }
 ```
@@ -53,13 +57,34 @@ It also was only tested with Avro Schemas backed by Confluent Schema Registry (b
 <td>Post Process JSON to XML. Some old RBDMS like Oracle 11 are not the best in handling JSON - for such scenarios this option can be used to transform the generated JSON into a schemaless XML String</td>
 <td>boolean</td><td>false</td><td>true/false</td><td>high</td>
 </tr>
-
+<tr>
+<td>json.writer.handle.logical.types</td>
+<td>In BSON serialization, logical types (dates, times, timestamps, decimal, bytes) are embedded inside a $<type> field. Setting this configuration to true will remove the embeddings and add the value to the parent field.</td>
+<td>boolean</td><td>false</td><td>true/false</td><td>high</td>
+</tr>
+<tr>
+<td>json.writer.datetime.logical.types.as</td>
+<td>Write the logical type field (of time, date or timestamp) either as a STRING or a LONG (epoc) value, only applicable if json.writer.handle.logical.types=true</td>
+<td>string</td><td>LONG</td><td>LONG/STRING</td><td>high</td>
+</tr>
+<tr>
+<td>json.writer.datetime.pattern</td>
+<td>The pattern (either a predefined constant or pattern letters) to use to format the date/time or timestamp as string, only applicable if json.writer.datetime.logical.types.as=STRING</td>
+<td>string</td>ISO_INSTANT<td></td><td>ISO_DATE,ISO_DATE_TIME,ISO_INSTANT,ISO_TIME,ISO_LOCAL_DATE,ISO_LOCAL_DATE_TIME,ISO_LOCAL_TIME,RFC_1123_DATE_TIME,ISO_ZONED_DATE_TIME,ISO_OFFSET_DATE,ISO_OFFSET_DATE_TIME,ISO_OFFSET_TIME,BASIC_ISO_DATE,ISO_ORDINAL_DATE,ISO_WEEK_DATE,"pattern"</td><td>high</td>
+</tr>
+<tr>
+<td>json.writer.datetime.zoneid</td>
+<td>The ZoneId to use to format the date/time or timestamp as string, only applicable if json.writer.datetime.logical.types.as=STRING</td>
+<td>string</td><td>UTC</td><td>a valid ZoneId string, such as Europe/Zurich, CET or UTC</td><td>high</td>
+</tr>
 </tbody></table>
 
 ## Example
 
 ##### Input 
+
 * Schema (avro syntax)
+
 ```json5
 {
 	"type": "record",

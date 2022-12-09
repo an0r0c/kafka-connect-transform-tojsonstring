@@ -16,7 +16,6 @@
 
 package com.github.cedelsb.kafka.connect.smt;
 
-import org.apache.kafka.common.Uuid;
 import org.apache.kafka.connect.data.*;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Before;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class Record2JsonStringConverterTest {
 
@@ -169,11 +169,12 @@ public class Record2JsonStringConverterTest {
     }
 
     @Test
-    public void transformRecordValue2JsonStringDateTimeHandlingTest() {
+    public void transformRecordValue2JsonStringLogicalTypesDatetimeAsStringTest() {
         final Map<String, Object> props = new HashMap<>();
 
         props.put("json.string.field.name", "myawesomejsonstringfield");
-        props.put("json.writer.output.mode", "EXTENDED");
+        props.put("json.writer.handle.logical.types", true);
+        props.put("json.writer.datetime.logical.types.as", "STRING");
 
         valueSmt.configure(props);
 
@@ -186,7 +187,115 @@ public class Record2JsonStringConverterTest {
         Struct value = (Struct) transformedRecord.value();
         String jsonString = (String) value.get("myawesomejsonstringfield");
 
-        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": {\"$numberDouble\": \"1.0\"}, \"simpleFLOAT64\": {\"$numberDouble\": \"2.0\"}, \"simpleInt8\": {\"$numberInt\": \"8\"}, \"simpleInt16\": {\"$numberInt\": \"2\"}, \"simpleInt32\": {\"$numberInt\": \"3\"}, \"simpleInt64\": {\"$numberLong\": \"4\"}, \"simpleBytes\": {\"$binary\": {\"base64\": \"S2Fma2Egcm9ja3Mh\", \"subType\": \"00\"}}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"optionalBytes\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}], \"simpleDate\": {\"$date\": {\"$numberLong\": \"1670025600000\"}}, \"simpleTime\": {\"$date\": {\"$numberLong\": \"1670025600000\"}}, \"simpleTimestamp\": {\"$date\": {\"$numberLong\": \"1670068800000\"}}, \"simpleDecimal\": {\"$numberDecimal\": \"12345.6789\"}}",jsonString);
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"simpleBytes\": {\"base64\": \"S2Fma2Egcm9ja3Mh\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"optionalBytes\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}], \"simpleDate\": \"2022-12-03T00:00:00Z\", \"simpleTime\": \"2022-12-03T00:00:00Z\", \"simpleTimestamp\": \"2022-12-03T12:00:00Z\", \"simpleDecimal\": 12345.6789}",jsonString);
+    }
+
+    @Test
+    public void transformRecordValue2JsonStringLogicalTypesDatetimeAsStringWithZoneIdTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("json.writer.handle.logical.types", true);
+        props.put("json.writer.datetime.logical.types.as", "STRING");
+        props.put("json.writer.datetime.zoneid", "Europe/Zurich");
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(1,transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA, transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"simpleBytes\": {\"base64\": \"S2Fma2Egcm9ja3Mh\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"optionalBytes\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}], \"simpleDate\": \"2022-12-03T00:00:00Z\", \"simpleTime\": \"2022-12-03T00:00:00Z\", \"simpleTimestamp\": \"2022-12-03T12:00:00Z\", \"simpleDecimal\": 12345.6789}",jsonString);
+    }
+
+    @Test
+    public void transformRecordValue2JsonStringLogicalTypesDatetimeAsStringWithDefinedPatternAndZoneIdTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("json.writer.handle.logical.types", true);
+        props.put("json.writer.datetime.logical.types.as", "STRING");
+        props.put("json.writer.datetime.pattern", "ISO_DATE_TIME");
+        props.put("json.writer.datetime.zoneid", "CET");
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(1,transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA, transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"simpleBytes\": {\"base64\": \"S2Fma2Egcm9ja3Mh\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"optionalBytes\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}], \"simpleDate\": \"2022-12-03T01:00:00+01:00[CET]\", \"simpleTime\": \"2022-12-03T01:00:00+01:00[CET]\", \"simpleTimestamp\": \"2022-12-03T13:00:00+01:00[CET]\", \"simpleDecimal\": 12345.6789}",jsonString);
+    }
+
+    @Test
+    public void transformRecordValue2JsonStringLogicalTypesDatetimeAsStringWithPatternAndZoneIdTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("json.writer.handle.logical.types", true);
+        props.put("json.writer.datetime.logical.types.as", "STRING");
+        props.put("json.writer.datetime.pattern", "dd.MM.yyyy HH:mm z");
+        props.put("json.writer.datetime.zoneid", "CET");
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(1,transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA, transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"simpleBytes\": {\"base64\": \"S2Fma2Egcm9ja3Mh\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"optionalBytes\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}], \"simpleDate\": \"03.12.2022 01:00 CET\", \"simpleTime\": \"03.12.2022 01:00 CET\", \"simpleTimestamp\": \"03.12.2022 13:00 CET\", \"simpleDecimal\": 12345.6789}",jsonString);
+    }
+    @Test
+    public void transformRecordValue2JsonStringLogicalTypesDatetimeAsLongTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("json.writer.handle.logical.types", true);
+        props.put("json.writer.datetime.logical.types.as", "LONG");
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(1,transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA, transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"simpleBytes\": {\"base64\": \"S2Fma2Egcm9ja3Mh\"}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"optionalBytes\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}], \"simpleDate\": 1670025600000, \"simpleTime\": 1670025600000, \"simpleTimestamp\": 1670068800000, \"simpleDecimal\": 12345.6789}",jsonString);
+    }
+
+    @Test
+    public void transformRecordValue2JsonStringLogicalTypesDatetimeAsWRONGVLAUETest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+        props.put("json.writer.handle.logical.types", true);
+        props.put("json.writer.datetime.logical.types.as", "wrong value");
+
+        try {
+            valueSmt.configure(props);
+            fail("Expected an IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong value for configuration setting: json.writer.datetime.logical.types.as=wrong value", ex.getMessage());
+        }
     }
 
     @Test
@@ -323,5 +432,25 @@ public class Record2JsonStringConverterTest {
                 "    <__EQ__numberDecimal>12345.6789</__EQ__numberDecimal>\n" +
                 "  </simpleDecimal>\n" +
                 "</root>",jsonString);
+    }
+
+    @Test
+    public void transformRecordValue2JsonStringLogicalTypesTest() {
+        final Map<String, Object> props = new HashMap<>();
+
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+
+        valueSmt.configure(props);
+
+        final SinkRecord record = new SinkRecord(null, 0, null, "test", simpleStructSchema, simpleStruct, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(1, transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA,transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"simpleBytes\": {\"$binary\": {\"base64\": \"S2Fma2Egcm9ja3Mh\", \"subType\": \"00\"}}, \"optionalBoolean\": null, \"optionalString\": null, \"optionalFloat\": null, \"optionalInt\": null, \"optionalBytes\": null, \"nestedArray\": [{\"entry\": \"testEntry\"}, {\"entry\": \"testEntry2\"}], \"simpleDate\": {\"$date\": \"2022-12-03T00:00:00Z\"}, \"simpleTime\": {\"$date\": \"2022-12-03T00:00:00Z\"}, \"simpleTimestamp\": {\"$date\": \"2022-12-03T12:00:00Z\"}, \"simpleDecimal\": {\"$numberDecimal\": \"12345.6789\"}}",jsonString);
     }
 }
