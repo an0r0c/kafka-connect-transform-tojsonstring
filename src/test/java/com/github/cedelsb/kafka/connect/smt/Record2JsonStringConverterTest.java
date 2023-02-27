@@ -17,6 +17,7 @@
 package com.github.cedelsb.kafka.connect.smt;
 
 import org.apache.kafka.connect.data.*;
+import org.apache.kafka.connect.data.Date;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,10 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -246,6 +244,8 @@ public class Record2JsonStringConverterTest {
         props.put("json.writer.datetime.logical.types.as", "STRING");
         props.put("json.writer.datetime.pattern", "dd.MM.yyyy HH:mm z");
         props.put("json.writer.datetime.zoneid", "CET");
+
+        Locale.setDefault(new Locale("en", "GB")); // Force Locale to be English so that the timezone display name is properly returned
 
         valueSmt.configure(props);
 
