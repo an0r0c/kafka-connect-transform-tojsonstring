@@ -136,23 +136,15 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         if (isTombstoneRecord(record))
             return record;
 
-        if (operatingSchema(record) == null) {
-            logger.info("The schema in record does not exist. transform it to jsonstring.");
-            return applyWithoutSchema(record);
-        }
-
-        return applyWithSchema(record);
-
-    }
-
-
-    private R applyWithSchema(R record) {
-
-        final Struct value = requireStruct(operatingValue(record), PURPOSE);
-
         Schema schema = operatingSchema(record);
+        Object value = operatingValue(record);
 
-        BsonDocument bsonDoc = converter.convert(schema, value);
+        BsonDocument bsonDoc;
+        if (schema != null) {
+            bsonDoc = convertWithSchema(schema, value);
+        } else {
+            bsonDoc = convertWithoutSchema(value);
+        }
 
         final Struct jsonStringOutputStruct = new Struct(jsonStringOutputSchema);
         String outputDocument = bsonDoc.toJson(jsonWriterSettings);
@@ -166,27 +158,22 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         return newRecord(record, jsonStringOutputSchema, jsonStringOutputStruct);
     }
 
-    private R applyWithoutSchema(R record) {
-        Object value = record.value();
+    private BsonDocument convertWithSchema(Schema schema, Object value) {
+        final Struct struct = requireStruct(value, PURPOSE);
+        return converter.convert(schema, struct);
+    }
 
-        Schema schema = SchemaBuilder
+    private BsonDocument convertWithoutSchema(Object value) {
+        return converterWithoutSchema.convert(makeDefaultSchema(), value);
+    }
+
+    private Schema makeDefaultSchema() {
+        return SchemaBuilder
                 .struct()
                 .name("defaultSchema")
+                .version(1)
                 .field("value", Schema.STRING_SCHEMA)
                 .build();
-
-        BsonDocument bsonDoc = converterWithoutSchema.convert(schema, value);
-
-        final Struct jsonStringOutputStruct = new Struct(jsonStringOutputSchema);
-        String outputDocument = bsonDoc.toJson(jsonWriterSettings);
-
-        if (transformToXML) {
-            outputDocument = U.jsonToXml(outputDocument);
-        }
-
-        jsonStringOutputStruct.put(jsonStringFieldName, outputDocument);
-
-        return newRecord(record, jsonStringOutputSchema, jsonStringOutputStruct);
     }
 
     @Override
