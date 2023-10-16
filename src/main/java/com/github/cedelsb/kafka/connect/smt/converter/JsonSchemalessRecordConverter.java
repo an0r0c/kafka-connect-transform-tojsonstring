@@ -22,6 +22,7 @@ import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.codecs.BsonValueCodecProvider;
 import org.bson.codecs.DocumentCodecProvider;
+import org.bson.codecs.MapCodecProvider;
 import org.bson.codecs.ValueCodecProvider;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -30,11 +31,12 @@ import java.util.Map;
 
 public class JsonSchemalessRecordConverter implements RecordConverter {
 
-    private CodecRegistry codecRegistry =
+    private final CodecRegistry codecRegistry =
                 CodecRegistries.fromProviders(
                         new DocumentCodecProvider(),
                         new BsonValueCodecProvider(),
-                        new ValueCodecProvider()
+                        new ValueCodecProvider(),
+                        new MapCodecProvider()
                 );
 
     @Override

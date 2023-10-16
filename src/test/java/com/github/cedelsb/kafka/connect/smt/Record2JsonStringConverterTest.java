@@ -167,6 +167,50 @@ public class Record2JsonStringConverterTest {
     }
 
     @Test
+    public void transformRecordValue2JsonStringWithoutSchemaTest() {
+        // value for json format without schema
+        HashMap<String, Object> simpleValueWithoutSchema = new LinkedHashMap<>();
+        simpleValueWithoutSchema.put("simpleString", "TestString");
+        simpleValueWithoutSchema.put("simpleBoolean", true);
+        simpleValueWithoutSchema.put("simpleFLOAT32", 1.0f);
+        simpleValueWithoutSchema.put("simpleFLOAT64", 2.0d);
+        simpleValueWithoutSchema.put("simpleInt8", (byte) 8);
+        simpleValueWithoutSchema.put("simpleInt16", (short) 2);
+        simpleValueWithoutSchema.put("simpleInt32", 3);
+        simpleValueWithoutSchema.put("simpleInt64", 4L);
+        simpleValueWithoutSchema.put("simpleBytes", new byte[]{75, 97, 102, 107, 97, 32, 114, 111, 99, 107, 115, 33});
+
+        LinkedHashMap<String, Object> simpleNestedObject1 = new LinkedHashMap<>();
+        simpleNestedObject1.put("entry", "testEntry");
+        LinkedHashMap<String, Object> simpleNestedObject2 = new LinkedHashMap<>();
+        simpleNestedObject2.put("entry", "testEntry2");
+
+        simpleValueWithoutSchema.put("nestedArray1", simpleNestedObject1);
+        simpleValueWithoutSchema.put("nestedArray2", simpleNestedObject2);
+
+        simpleValueWithoutSchema.put("simpleDate",java.util.Date.from(ZonedDateTime.of(LocalDate.of(2022,12,3), LocalTime.MIDNIGHT, ZoneOffset.UTC).toInstant()));
+        simpleValueWithoutSchema.put("simpleTime",java.util.Date.from(ZonedDateTime.of(LocalDate.of(2022,12,3), LocalTime.MIDNIGHT, ZoneOffset.UTC).toInstant()));
+        simpleValueWithoutSchema.put("simpleTimestamp",java.util.Date.from(ZonedDateTime.of(LocalDate.of(2022,12,3), LocalTime.NOON, ZoneOffset.UTC).toInstant()));
+        simpleValueWithoutSchema.put("simpleDecimal", new BigDecimal("12345.6789"));
+
+
+        final Map<String, Object> props = new HashMap<>();
+        props.put("json.string.field.name", "myawesomejsonstringfield");
+
+        valueSmt.configure(props);
+        final SinkRecord record = new SinkRecord(null, 0, null, null, null, simpleValueWithoutSchema, 0);
+        final SinkRecord transformedRecord = valueSmt.apply(record);
+
+        assertEquals(1, transformedRecord.valueSchema().fields().size());
+        assertEquals(Schema.STRING_SCHEMA,transformedRecord.valueSchema().field("myawesomejsonstringfield").schema());
+
+        Struct value = (Struct) transformedRecord.value();
+        String jsonString = (String) value.get("myawesomejsonstringfield");
+
+        assertEquals("{\"simpleString\": \"TestString\", \"simpleBoolean\": true, \"simpleFLOAT32\": 1.0, \"simpleFLOAT64\": 2.0, \"simpleInt8\": 8, \"simpleInt16\": 2, \"simpleInt32\": 3, \"simpleInt64\": 4, \"simpleBytes\": {\"$binary\": {\"base64\": \"S2Fma2Egcm9ja3Mh\", \"subType\": \"00\"}}, \"nestedArray1\": {\"entry\": \"testEntry\"}, \"nestedArray2\": {\"entry\": \"testEntry2\"}, \"simpleDate\": {\"$date\": \"2022-12-03T00:00:00Z\"}, \"simpleTime\": {\"$date\": \"2022-12-03T00:00:00Z\"}, \"simpleTimestamp\": {\"$date\": \"2022-12-03T12:00:00Z\"}, \"simpleDecimal\": {\"$numberDecimal\": \"12345.6789\"}}", jsonString);
+    }
+
+    @Test
     public void transformRecordValue2JsonStringLogicalTypesDatetimeAsStringTest() {
         final Map<String, Object> props = new HashMap<>();
 

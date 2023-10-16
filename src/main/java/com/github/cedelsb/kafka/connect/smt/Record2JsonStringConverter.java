@@ -17,6 +17,7 @@
 package com.github.cedelsb.kafka.connect.smt;
 
 import com.github.cedelsb.kafka.connect.smt.converter.AvroJsonSchemafulRecordConverter;
+import com.github.cedelsb.kafka.connect.smt.converter.JsonSchemalessRecordConverter;
 import com.github.cedelsb.kafka.connect.smt.converter.types.json.JsonBinaryConverter;
 import com.github.cedelsb.kafka.connect.smt.converter.types.json.JsonDateTimeAsLongConverter;
 import com.github.cedelsb.kafka.connect.smt.converter.types.json.JsonDateTimeAsStringConverter;
@@ -86,6 +87,7 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
     private boolean handleLogicalTypes;
 
     AvroJsonSchemafulRecordConverter converter;
+    JsonSchemalessRecordConverter converterWithoutSchema;
     JsonWriterSettings jsonWriterSettings;
 
     @Override
@@ -123,6 +125,7 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         }
 
         converter = new AvroJsonSchemafulRecordConverter();
+        converterWithoutSchema = new JsonSchemalessRecordConverter();
 
         transformToXML = config.getBoolean(ConfigName.POST_PROCESSING_TO_XML);
     }
@@ -133,34 +136,44 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
         if (isTombstoneRecord(record))
             return record;
 
-        if (operatingSchema(record) == null) {
-            logger.info("toJsontransformation is ignoring value/key without schema");
-            return record;
-        }
-
-        return applyWithSchema(record);
-
-    }
-
-
-    private R applyWithSchema(R record) {
-
-        final Struct value = requireStruct(operatingValue(record), PURPOSE);
-
         Schema schema = operatingSchema(record);
+        Object value = operatingValue(record);
 
-        BsonDocument bsonDoc = converter.convert(schema, value);
+        BsonDocument bsonDoc;
+        if (schema != null) {
+            bsonDoc = convertWithSchema(schema, value);
+        } else {
+            bsonDoc = convertWithoutSchema(value);
+        }
 
         final Struct jsonStringOutputStruct = new Struct(jsonStringOutputSchema);
         String outputDocument = bsonDoc.toJson(jsonWriterSettings);
 
-        if(transformToXML) {
-           outputDocument = U.jsonToXml(outputDocument);
+        if (transformToXML) {
+            outputDocument = U.jsonToXml(outputDocument);
         }
 
         jsonStringOutputStruct.put(jsonStringFieldName, outputDocument);
 
         return newRecord(record, jsonStringOutputSchema, jsonStringOutputStruct);
+    }
+
+    private BsonDocument convertWithSchema(Schema schema, Object value) {
+        final Struct struct = requireStruct(value, PURPOSE);
+        return converter.convert(schema, struct);
+    }
+
+    private BsonDocument convertWithoutSchema(Object value) {
+        return converterWithoutSchema.convert(makeDefaultSchema(), value);
+    }
+
+    private Schema makeDefaultSchema() {
+        return SchemaBuilder
+                .struct()
+                .name("defaultSchema")
+                .version(1)
+                .field("value", Schema.STRING_SCHEMA)
+                .build();
     }
 
     @Override
@@ -183,10 +196,8 @@ public abstract class Record2JsonStringConverter<R extends ConnectRecord<R>> imp
                 .build();
     }
 
-    private JsonMode toJsonMode(String jsonMode)
-    {
-        switch(jsonMode)
-        {
+    private JsonMode toJsonMode(String jsonMode) {
+        switch (jsonMode) {
             case "SHELL":
                 return JsonMode.SHELL;
             case "EXTENDED":
