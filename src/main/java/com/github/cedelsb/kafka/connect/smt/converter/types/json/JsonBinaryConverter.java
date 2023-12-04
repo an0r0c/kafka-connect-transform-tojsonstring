@@ -35,7 +35,7 @@ public class JsonBinaryConverter implements Converter<BsonBinary> {
             writer.writeString("base64", base64);
             writer.writeEndObject();
         } catch (Exception e) {
-            LOGGER.error(String.format("Fail to convert offset %d to JSON binary", value.toString()), e);
+            LOGGER.error(String.format("Fail to convert offset %s to JSON binary", value.toString()), e);
         }
     }
 }

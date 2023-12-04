@@ -29,7 +29,7 @@ public class JsonDecimalConverter implements Converter<Decimal128> {
         try {
             writer.writeNumber(value.toString());
         } catch (Exception e) {
-            LOGGER.error(String.format("Fail to convert offset %d to JSON decimal", value), e);
+            LOGGER.error(String.format("Fail to convert offset %s to JSON decimal", String.valueOf(value)), e);
         }
     }
 }
