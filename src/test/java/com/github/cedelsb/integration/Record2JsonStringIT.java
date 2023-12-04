@@ -91,6 +91,7 @@ public class Record2JsonStringIT {
     @ClassRule
     public static DockerComposeContainer CONTAINER_ENV =
             new DockerComposeContainer(new File(DOCKER_COMPOSE_FILE))
+                    .withOptions("--compatibility")
                     .withLocalCompose(true)
                     .withExposedService(KAFKA_BROKER+DEFAULT_COMPOSE_SERVICE_SUFFIX,KAFKA_BROKER_PORT)
                     .withExposedService(KAFKA_CONNECT+DEFAULT_COMPOSE_SERVICE_SUFFIX,KAFKA_CONNECT_PORT,
